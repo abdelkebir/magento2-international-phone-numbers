@@ -1,0 +1,124 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// @codingStandardsIgnoreFile
+
+/** @var \Magento\Customer\Block\Widget\Telephone $block */
+?>
+<?php
+$allowedCountries = explode(",",$block->getAllowedCountries());
+?>
+<div class="field telephone <?= $block->isRequired() ? 'required' : '' ?>">
+    <label for="telephone" class="label">
+        <span>
+            <?= $block->escapeHtml(__('Phone Number')) ?>
+        </span>
+    </label>
+    <div class="control">
+        <?php
+            $_validationClass = $block->escapeHtmlAttr(
+                $this->helper('Magento\Customer\Helper\Address')
+                     ->getAttributeValidationClass('telephone')
+            );
+        ?>
+        <div class="phoneArea">
+            <div class="encloser">
+                <select id="countryPhoneCode">
+                    <?php
+                    foreach($allowedCountries as $countryCode){
+                        $countryInformation = $block->getCountryInformation($countryCode);
+                        ?><option data-phone-code="+<?= $countryInformation['phone'][0] ?>" value="<?php echo $countryCode; ?>"><?php echo /*__($countryInformation['name']) .*/'+'. $countryInformation['phone'][0];?></option><?php
+                    }
+                    ?>
+                </select>
+              </div>
+            <input type="text"
+                   id="localTelephoneNumber"
+                   value="<?= $block->escapeHtmlAttr($block->getLocalTelephone()) ?>"
+                   title="<?= $block->escapeHtmlAttr(__('Phone Number')) ?>"
+                   class="input-text <?= $_validationClass ?: '' ?>">
+        </div>
+        <input type="hidden"
+               name="telephone"
+               id="telephone"
+               value=""
+               class="input-text"
+        >
+    </div>
+</div>
+<script type="text/javascript">
+    require(['jquery', 'jquery/ui'], function($){
+        $(document).ready( function() {
+            function validatePhone(){
+              var localPhoneNumber = $('#localTelephoneNumber').val();
+              var localPhoneNumberArray = localPhoneNumber.split('');
+              var outputlocalPhoneNumberArray = [];
+              $.each(localPhoneNumberArray, function( index, value ) {
+                  if((value === "0" || value === "٠") && outputlocalPhoneNumberArray.length == 0){
+
+                  } else if (value === "٠"){
+                      outputlocalPhoneNumberArray.push("0");
+                  } else if (value === "١"){
+                      outputlocalPhoneNumberArray.push("1");
+                  } else if (value === "٢"){
+                      outputlocalPhoneNumberArray.push("2");
+                  } else if (value === "٣"){
+                      outputlocalPhoneNumberArray.push("3");
+                  } else if (value === "٤"){
+                      outputlocalPhoneNumberArray.push("4");
+                  } else if (value === "٥"){
+                      outputlocalPhoneNumberArray.push("5");
+                  } else if (value === "٦"){
+                      outputlocalPhoneNumberArray.push("6");
+                  } else if (value === "٧"){
+                      outputlocalPhoneNumberArray.push("7");
+                  } else if (value === "٨"){
+                      outputlocalPhoneNumberArray.push("8");
+                  } else if (value === "٩"){
+                      outputlocalPhoneNumberArray.push("9");
+                  } else {
+                      outputlocalPhoneNumberArray.push(value);
+                  }
+              });
+              var outputlocalPhoneNumber = outputlocalPhoneNumberArray.join("");
+              $('#localTelephoneNumber').val(outputlocalPhoneNumber);
+            }
+            function registerPhone(){
+              var phoneCode = $('#countryPhoneCode').find(":selected").data('phone-code');
+              var localPhoneNumber = $('#localTelephoneNumber').val();
+              var internationalPhoneNumber = phoneCode + localPhoneNumber;
+              $('#telephone').val(internationalPhoneNumber);
+            }
+            if($('#country').val()){
+                $("#countryPhoneCode").val($('#country').val()).change();
+            } else {
+                $("#countryPhoneCode").val('<?= $block->escapeHtmlAttr($block->getDefaultCountry()) ?>').change();
+            }
+            $("#country").change(function () {
+                var end = this.value;
+                $("#countryPhoneCode").val(end).change();
+            });
+
+            $("#localTelephoneNumber").on('change keydown paste input', function(){
+                validatePhone();
+                registerPhone();
+            });
+            validatePhone();
+            registerPhone();
+        });
+    });
+</script>
+<style type="text/css">
+    .phoneArea select {
+      width: 140px;box-shadow: unset !important;pointer-events: none;
+    }
+    .phoneArea input {
+    	width: calc(100% - 100px);display: inline-block;
+    }
+    .phoneArea .encloser {
+    	width: 100px;display: inline-block;float: left;
+    }
+</style>
