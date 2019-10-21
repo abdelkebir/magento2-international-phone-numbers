@@ -24,7 +24,7 @@ $allowedCountries = explode(",",$block->getAllowedCountries());
                      ->getAttributeValidationClass('telephone')
             );
         ?>
-        <div class="phoneArea">
+        <div class="phoneArea" style="min-height: 40px;">
             <div class="encloser">
                 <select id="countryPhoneCode">
                     <?php
@@ -35,11 +35,23 @@ $allowedCountries = explode(",",$block->getAllowedCountries());
                     ?>
                 </select>
               </div>
-            <input type="text"
-                   id="localTelephoneNumber"
-                   value="<?= $block->escapeHtmlAttr($block->getLocalTelephone()) ?>"
-                   title="<?= $block->escapeHtmlAttr(__('Phone Number')) ?>"
-                   class="input-text <?= $_validationClass ?: '' ?>">
+              <?php
+              $count = 0;
+              foreach($allowedCountries as $countryCode){
+                  $countryInformation = $block->getCountryInformation($countryCode);
+
+                  ?>
+                  <input type="text"
+                         id="localTelephoneNumber"
+                         value="<?= $block->escapeHtmlAttr($block->getLocalTelephone()) ?>"
+                         title="<?= $block->escapeHtmlAttr(__('Phone Number')) ?>"
+                         class="localTelephoneNumber input-text phone-length-<?= $countryCode ?> <?= $_validationClass ?: '' ?>"
+                         style="<?php if($count){ echo 'display:none;'; } ?>">
+
+                  <?php
+                  $count++;
+              }
+              ?>
         </div>
         <input type="hidden"
                name="telephone"
@@ -50,15 +62,52 @@ $allowedCountries = explode(",",$block->getAllowedCountries());
     </div>
 </div>
 <script type="text/javascript">
-    require(['jquery', 'jquery/ui'], function($){
+    require(['jquery', 'mage/translate', 'jquery/ui', 'jquery/validate'], function($, $t){
         $(document).ready( function() {
+            $('#countryPhoneCode > option').each(function() {
+                var countryCode = $(this).val();
+                countryPhoneLengthMessage = '';
+                if(countryCode == 'SA'){ // Saudi Arabia
+                    countryPhoneLengthMessage = '9';
+                } else if (countryCode == 'KW'){ // Kuwait
+                    countryPhoneLengthMessage = '7 '+$t('or')+' 8';
+                } else if (countryCode == 'RO'){ // Romania
+                    countryPhoneLengthMessage = '9';
+                } else {
+                    countryPhoneLengthMessage ='';
+                }
+                $.validator.addMethod(
+                    'phone-length-'+countryCode , function (value) {
+                    if(countryCode == 'SA'){ // Saudi Arabia
+                        if( value.length == 9 ){
+                            return true;
+                        }else{
+                            return false;
+                        }
+                    } else if (countryCode == 'KW'){ // Kuwait
+                        if( value.length == 7 || value.length == 8 ){
+                            return true;
+                        }else{
+                            return false;
+                        }
+                    } else if (countryCode == 'RO'){ // Romania
+                        if( value.length == 9 ){
+                            return true;
+                        }else{
+                            return false;
+                        }
+                    } else {
+                        return true;
+                    }
+                }, $t('Phone numbers are exactly %s digits.').replace('%s', countryPhoneLengthMessage));
+            });
+
             function validatePhone(){
               var localPhoneNumber = $('#localTelephoneNumber').val();
               var localPhoneNumberArray = localPhoneNumber.split('');
               var outputlocalPhoneNumberArray = [];
               $.each(localPhoneNumberArray, function( index, value ) {
                   if((value === "0" || value === "٠") && outputlocalPhoneNumberArray.length == 0){
-
                   } else if (value === "٠"){
                       outputlocalPhoneNumberArray.push("0");
                   } else if (value === "١"){
@@ -79,8 +128,10 @@ $allowedCountries = explode(",",$block->getAllowedCountries());
                       outputlocalPhoneNumberArray.push("8");
                   } else if (value === "٩"){
                       outputlocalPhoneNumberArray.push("9");
-                  } else {
+                  } else if(value === "0" || value === "1" || value === "2" || value === "3" || value === "4" || value === "5" || value === "6" || value === "7" || value === "8" || value === "9"){
                       outputlocalPhoneNumberArray.push(value);
+                  } else {
+                      // do nothing
                   }
               });
               var outputlocalPhoneNumber = outputlocalPhoneNumberArray.join("");
@@ -101,6 +152,16 @@ $allowedCountries = explode(",",$block->getAllowedCountries());
                 var end = this.value;
                 $("#countryPhoneCode").val(end).change();
             });
+            $("#countryPhoneCode").change(function () {
+                $('#localTelephoneNumber-error').appendTo($('#localTelephoneNumber-error').parent().first());
+                var end = this.value;
+                $('.localTelephoneNumber').hide();
+                $('.localTelephoneNumber.phone-length-'+end).show();
+                console.log('********************** 888');
+                console.log('end: '+end);
+
+            });
+            // $("#countryPhoneCode").change();
 
             $("#localTelephoneNumber").on('change keydown paste input', function(){
                 validatePhone();
