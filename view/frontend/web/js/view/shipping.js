@@ -26,7 +26,8 @@ define([
     'Magento_Checkout/js/checkout-data',
     'uiRegistry',
     'mage/translate',
-    'Magento_Checkout/js/model/shipping-rate-service'
+    'Magento_Checkout/js/model/shipping-rate-service',
+    'jquery/validate'
 ], function (
     $,
     _,
@@ -175,8 +176,10 @@ define([
                     outputlocalPhoneNumberArray.push("8");
                 } else if (value === "٩"){
                     outputlocalPhoneNumberArray.push("9");
-                } else {
+                } else if(value === "0" || value === "1" || value === "2" || value === "3" || value === "4" || value === "5" || value === "6" || value === "7" || value === "8" || value === "9"){
                     outputlocalPhoneNumberArray.push(value);
+                } else {
+                    // do nothing
                 }
             });
             var outputlocalPhoneNumber = outputlocalPhoneNumberArray.join("");
@@ -185,6 +188,8 @@ define([
         renderPhoneForm: function(){
           var self = this;
           if(!$('#shipping-new-address-form .phoneArea').length){
+
+
             var defaultCountry = window.checkoutConfig.default_country_config;
             var allowedCountries = window.checkoutConfig.allowed_countries_config;
             var countriesPhonesList = window.checkoutConfig.countries_phones_list;
@@ -200,7 +205,14 @@ define([
                       });
                     html += '</select>';
                   html += '</div>';
-                html += '<input type="text" class="input-text localTelephoneNumber" style="width: calc(100% - 136px);display: inline-block;">';
+                html += '<input type="text" class="input-text localTelephoneNumber required-entry" style="width: calc(100% - 136px);display: inline-block;">';
+                /*
+                $.each(allowedCountries, function( index, countryCode ) {
+                    var countryInformation = countriesPhonesList[countryCode];
+                  html += '<input type="text" class="input-text localTelephoneNumber required-entry phone-length-'+countryCode+'" style="width: calc(100% - 136px);display: inline-block;">';
+                });
+                */
+
               html += '</div>';
 
             $('#shipping-new-address-form input[name="telephone"]').hide();
