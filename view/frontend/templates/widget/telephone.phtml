@@ -36,20 +36,15 @@ $allowedCountries = explode(",",$block->getAllowedCountries());
                 </select>
               </div>
               <?php
-              $count = 0;
               foreach($allowedCountries as $countryCode){
                   $countryInformation = $block->getCountryInformation($countryCode);
-
                   ?>
                   <input type="text"
                          id="localTelephoneNumber"
                          value="<?= $block->escapeHtmlAttr($block->getLocalTelephone()) ?>"
                          title="<?= $block->escapeHtmlAttr(__('Phone Number')) ?>"
-                         class="localTelephoneNumber input-text phone-length-<?= $countryCode ?> <?= $_validationClass ?: '' ?>"
-                         style="<?php if($count){ echo 'display:none;'; } ?>">
-
+                         class="localTelephoneNumber input-text phone-length-<?= $countryCode ?> <?= $_validationClass ?: '' ?>">
                   <?php
-                  $count++;
               }
               ?>
         </div>
@@ -69,12 +64,18 @@ $allowedCountries = explode(",",$block->getAllowedCountries());
                 countryPhoneLengthMessage = '';
                 if(countryCode == 'SA'){ // Saudi Arabia
                     countryPhoneLengthMessage = '9';
-                } else if (countryCode == 'KW'){ // Kuwait
-                    countryPhoneLengthMessage = '7 '+$t('or')+' 8';
-                } else if (countryCode == 'RO'){ // Romania
+                } else if (countryCode == 'BH'){ // Bahrain
+                    countryPhoneLengthMessage = '8';
+                } else if (countryCode == 'AE'){ // United Arab Emirates
                     countryPhoneLengthMessage = '9';
-                } else {
-                    countryPhoneLengthMessage ='';
+                } else if (countryCode == 'KW'){ // Kuwait
+                    countryPhoneLengthMessage = '8';
+                } else if (countryCode == 'OM'){ // Oman
+                    countryPhoneLengthMessage = '8';
+                } else if (countryCode == 'IQ'){ // Iraq
+                    countryPhoneLengthMessage = '10';
+                } else if (countryCode == 'QA'){ // Qatar
+                    countryPhoneLengthMessage = '8';
                 }
                 $.validator.addMethod(
                     'phone-length-'+countryCode , function (value) {
@@ -84,26 +85,49 @@ $allowedCountries = explode(",",$block->getAllowedCountries());
                         }else{
                             return false;
                         }
-                    } else if (countryCode == 'KW'){ // Kuwait
-                        if( value.length == 7 || value.length == 8 ){
+                    } else if (countryCode == 'BH'){ // Bahrain
+                        if( value.length == 8 ){
                             return true;
                         }else{
                             return false;
                         }
-                    } else if (countryCode == 'RO'){ // Romania
+                    } else if (countryCode == 'AE'){ // United Arab Emirates
                         if( value.length == 9 ){
                             return true;
                         }else{
                             return false;
                         }
-                    } else {
-                        return true;
+                    } else if (countryCode == 'KW'){ // Kuwait
+                        if( value.length == 8 ){
+                            return true;
+                        }else{
+                            return false;
+                        }
+                    } else if (countryCode == 'OM'){ // Oman
+                        if( value.length == 8 ){
+                            return true;
+                        }else{
+                            return false;
+                        }
+                    } else if (countryCode == 'IQ'){ // Iraq
+                        if( value.length == 10 ){
+                            return true;
+                        }else{
+                            return false;
+                        }
+                    } else if (countryCode == 'QA'){ // Qatar
+                        if( value.length == 8 ){
+                            return true;
+                        }else{
+                            return false;
+                        }
                     }
-                }, $t('Phone numbers are exactly %s digits.').replace('%s', countryPhoneLengthMessage));
+                }, $t('Phone number is exactly %s digits.').replace('%s', countryPhoneLengthMessage));
             });
 
-            function validatePhone(){
-              var localPhoneNumber = $('#localTelephoneNumber').val();
+            function validatePhone(element){
+              console.log('validate ****');
+              var localPhoneNumber = element.val();
               var localPhoneNumberArray = localPhoneNumber.split('');
               var outputlocalPhoneNumberArray = [];
               $.each(localPhoneNumberArray, function( index, value ) {
@@ -135,7 +159,7 @@ $allowedCountries = explode(",",$block->getAllowedCountries());
                   }
               });
               var outputlocalPhoneNumber = outputlocalPhoneNumberArray.join("");
-              $('#localTelephoneNumber').val(outputlocalPhoneNumber);
+              element.val(outputlocalPhoneNumber);
             }
             function registerPhone(){
               var phoneCode = $('#countryPhoneCode').find(":selected").data('phone-code');
@@ -143,11 +167,7 @@ $allowedCountries = explode(",",$block->getAllowedCountries());
               var internationalPhoneNumber = phoneCode + localPhoneNumber;
               $('#telephone').val(internationalPhoneNumber);
             }
-            if($('#country').val()){
-                $("#countryPhoneCode").val($('#country').val()).change();
-            } else {
-                $("#countryPhoneCode").val('<?= $block->escapeHtmlAttr($block->getDefaultCountry()) ?>').change();
-            }
+
             $("#country").change(function () {
                 var end = this.value;
                 $("#countryPhoneCode").val(end).change();
@@ -157,29 +177,58 @@ $allowedCountries = explode(",",$block->getAllowedCountries());
                 var end = this.value;
                 $('.localTelephoneNumber').hide();
                 $('.localTelephoneNumber.phone-length-'+end).show();
-                console.log('********************** 888');
-                console.log('end: '+end);
 
             });
+
+
+
             // $("#countryPhoneCode").change();
 
-            $("#localTelephoneNumber").on('change keydown paste input', function(){
-                validatePhone();
+            $(".localTelephoneNumber").on('change keydown paste input', function(){
+                validatePhone($(this));
                 registerPhone();
             });
-            validatePhone();
+            $('.localTelephoneNumber').each(function() {
+                validatePhone($(this));
+            });
             registerPhone();
+
+            if($('#country').val()){
+                $("#countryPhoneCode").val($('#country').val()).change();
+            } else {
+                $("#countryPhoneCode").val('<?= $block->escapeHtmlAttr($block->getDefaultCountry()) ?>').change();
+            }
+
+
         });
     });
 </script>
 <style type="text/css">
     .phoneArea select {
-      width: 140px;box-shadow: unset !important;pointer-events: none;
+        width: 140px;
+        box-shadow: unset !important;
+        pointer-events: none;
+        border: unset;
     }
     .phoneArea input {
-    	width: calc(100% - 100px);display: inline-block;
+      	width: calc(100% - 100px);
+        display: inline-block;
     }
     .phoneArea .encloser {
-    	width: 100px;display: inline-block;float: left;
+      	width: 100px;
+      	display: inline-block;
+      	float: left;
+      	overflow: hidden;
+      	border: 1px solid #ccc;
+      	height: 40px;
+      	border-right: 0;
+    }
+    .phoneArea {
+    	margin-bottom: 24px;
+    	position: relative;
+    }
+    .phoneArea div.mage-error {
+    	position: absolute;
+    	top: 38px;
     }
 </style>

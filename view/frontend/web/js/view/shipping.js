@@ -142,53 +142,50 @@ define([
         navigate: function (step) {
             step && step.isVisible(true);
         },
-
-        registerPhone: function(id){
-            var phoneCode = $('#'+id+' .countryPhoneCode').find(":selected").data('phone-code');
-            var localPhoneNumber = $('#'+id+' .localTelephoneNumber').val();
+        registerPhone: function(){
+            var phoneCode = $('#countryPhoneCode').find(":selected").data('phone-code');
+            var localPhoneNumber = $('#localTelephoneNumber').val();
             var internationalPhoneNumber = phoneCode + localPhoneNumber;
-            $('#'+id+' input[name="telephone"]').val(internationalPhoneNumber).change();
+            $('input[name="telephone"]').val(internationalPhoneNumber).change();
         },
-
-        validatePhone: function(id){
-            var localPhoneNumber = $('#'+id+' .localTelephoneNumber').first().val();
-            var localPhoneNumberArray = localPhoneNumber.split('');
-            var outputlocalPhoneNumberArray = [];
-            $.each(localPhoneNumberArray, function( index, value ) {
-                if((value === "0" || value === "٠") && outputlocalPhoneNumberArray.length == 0){
-                } else if (value === "٠"){
-                    outputlocalPhoneNumberArray.push("0");
-                } else if (value === "١"){
-                    outputlocalPhoneNumberArray.push("1");
-                } else if (value === "٢"){
-                    outputlocalPhoneNumberArray.push("2");
-                } else if (value === "٣"){
-                    outputlocalPhoneNumberArray.push("3");
-                } else if (value === "٤"){
-                    outputlocalPhoneNumberArray.push("4");
-                } else if (value === "٥"){
-                    outputlocalPhoneNumberArray.push("5");
-                } else if (value === "٦"){
-                    outputlocalPhoneNumberArray.push("6");
-                } else if (value === "٧"){
-                    outputlocalPhoneNumberArray.push("7");
-                } else if (value === "٨"){
-                    outputlocalPhoneNumberArray.push("8");
-                } else if (value === "٩"){
-                    outputlocalPhoneNumberArray.push("9");
-                } else if(value === "0" || value === "1" || value === "2" || value === "3" || value === "4" || value === "5" || value === "6" || value === "7" || value === "8" || value === "9"){
-                    outputlocalPhoneNumberArray.push(value);
-                } else {
-                    // do nothing
-                }
-            });
-            var outputlocalPhoneNumber = outputlocalPhoneNumberArray.join("");
-            $('#'+id+' .localTelephoneNumber').val(outputlocalPhoneNumber);
+        validatePhone: function(element){
+          var localPhoneNumber = element.val();
+          var localPhoneNumberArray = localPhoneNumber.split('');
+          var outputlocalPhoneNumberArray = [];
+          $.each(localPhoneNumberArray, function( index, value ) {
+              if((value === "0" || value === "٠") && outputlocalPhoneNumberArray.length == 0){
+              } else if (value === "٠"){
+                  outputlocalPhoneNumberArray.push("0");
+              } else if (value === "١"){
+                  outputlocalPhoneNumberArray.push("1");
+              } else if (value === "٢"){
+                  outputlocalPhoneNumberArray.push("2");
+              } else if (value === "٣"){
+                  outputlocalPhoneNumberArray.push("3");
+              } else if (value === "٤"){
+                  outputlocalPhoneNumberArray.push("4");
+              } else if (value === "٥"){
+                  outputlocalPhoneNumberArray.push("5");
+              } else if (value === "٦"){
+                  outputlocalPhoneNumberArray.push("6");
+              } else if (value === "٧"){
+                  outputlocalPhoneNumberArray.push("7");
+              } else if (value === "٨"){
+                  outputlocalPhoneNumberArray.push("8");
+              } else if (value === "٩"){
+                  outputlocalPhoneNumberArray.push("9");
+              } else if(value === "0" || value === "1" || value === "2" || value === "3" || value === "4" || value === "5" || value === "6" || value === "7" || value === "8" || value === "9"){
+                  outputlocalPhoneNumberArray.push(value);
+              } else {
+                  // do nothing
+              }
+          });
+          var outputlocalPhoneNumber = outputlocalPhoneNumberArray.join("");
+          element.val(outputlocalPhoneNumber);
         },
         renderPhoneForm: function(){
           var self = this;
           if(!$('#shipping-new-address-form .phoneArea').length){
-
 
             var defaultCountry = window.checkoutConfig.default_country_config;
             var allowedCountries = window.checkoutConfig.allowed_countries_config;
@@ -197,38 +194,105 @@ define([
             var allowedCountries = allowedCountries.split(',');
 
             var html = '<div class="phoneArea">';
-                  html += '<div class="encloser" style="width: 100px;display: inline-block;float: left;">';
-                    html += '<select class="countryPhoneCode" style="width: 140px;box-shadow: unset !important;pointer-events: none;">';
+                  html += '<div class="encloser" style="width: 100px;display: inline-block;float: left; overflow:hidden; border: 1px solid #ccc; border-right: unset; height:40px;">';
+                    html += '<select id="countryPhoneCode" style="width: 140px;box-shadow: unset !important;pointer-events: none; border:unset;">';
                       $.each(allowedCountries, function( index, countryCode ) {
                           var countryInformation = countriesPhonesList[countryCode];
                         html += '<option data-phone-code="+'+ countryInformation["phone"][0] +'" value="'+ countryCode +'">+'+ countryInformation["phone"][0] +'</option>';
                       });
                     html += '</select>';
                   html += '</div>';
-                html += '<input type="text" class="input-text localTelephoneNumber required-entry" style="width: calc(100% - 136px);display: inline-block;">';
-                /*
                 $.each(allowedCountries, function( index, countryCode ) {
-                    var countryInformation = countriesPhonesList[countryCode];
-                  html += '<input type="text" class="input-text localTelephoneNumber required-entry phone-length-'+countryCode+'" style="width: calc(100% - 136px);display: inline-block;">';
+                    html += '<input type="text" id="localTelephoneNumber" required="true" class="input-text required localTelephoneNumber phone-length-'+ countryCode +'" style="width: calc(100% - 100px);display: inline-block;">';
                 });
-                */
-
-              html += '</div>';
+            html += '</div>';
 
             $('#shipping-new-address-form input[name="telephone"]').hide();
             $('#shipping-new-address-form input[name="telephone"]').before( html );
 
-            $("#shipping-new-address-form .localTelephoneNumber").first().on('change keydown paste input', function(){
-                self.validatePhone("shipping-new-address-form");
-                self.registerPhone("shipping-new-address-form");
+
+
+            $('#countryPhoneCode > option').each(function() {
+                console.log('777777777777')
+                var countryCode = $(this).val();
+                var countryPhoneLengthMessage = '';
+                if(countryCode == 'SA'){ // Saudi Arabia
+                    countryPhoneLengthMessage = '9';
+                } else if (countryCode == 'KW'){ // Kuwait
+                    countryPhoneLengthMessage = '7 '+$t('or')+' 8';
+                } else if (countryCode == 'RO'){ // Romania
+                    countryPhoneLengthMessage = '9';
+                } else {
+                    countryPhoneLengthMessage ='';
+                }
+
+                $('.phone-length-'+countryCode).on('change keydown paste input', function(){
+                    var currentElement = $(this);
+                    var value = currentElement.val();
+                    if(countryCode == 'SA'){ // Saudi Arabia
+                        if( value.length == 9 ){
+                        }else{
+                            var errorElement = '<div class="field-error two">';
+                            errorElement+='<span>'+ $t("Phone numbers are exactly %s digits.").replace("%s", countryPhoneLengthMessage) +'</span>';
+                            errorElement+='</div>';
+                            $( ".phoneArea .field-error" ).remove();
+                            $( ".phoneArea" ).append( errorElement );
+                        }
+                    } else if (countryCode == 'KW'){ // Kuwait
+                        if( value.length == 7 || value.length == 8 ){
+                        }else{
+                            var errorElement = '<div class="field-error two">';
+                            errorElement+='<span>'+ $t("Phone numbers are exactly %s digits.").replace("%s", countryPhoneLengthMessage) +'</span>';
+                            errorElement+='</div>';
+                            $( ".phoneArea .field-error" ).remove();
+                            $( ".phoneArea" ).append( errorElement );
+                        }
+                    } else if (countryCode == 'RO'){ // Romania
+                        if( value.length == 9 ){
+                        }else{
+                            var errorElement = '<div class="field-error two">';
+                            errorElement+='<span>'+ $t("Phone numbers are exactly %s digits.").replace("%s", countryPhoneLengthMessage) +'</span>';
+                            errorElement+='</div>';
+                            $( ".phoneArea .field-error" ).remove();
+                            $( ".phoneArea" ).append( errorElement );
+                        }
+                    } else {
+
+                    }
+
+
+                });
             });
-            $('#shipping-new-address-form select[name="country_id"]').change(function () {
+
+            $('select[name="country_id"]').change(function () {
                 var end = this.value;
-                $("#shipping-new-address-form .countryPhoneCode").first().val(end).change();
+                $("#countryPhoneCode").val(end).change();
             });
-            if($('#shipping-new-address-form select[name="country_id"]').val()){
-              $("#shipping-new-address-form .countryPhoneCode").first().val($('#shipping-new-address-form select[name="country_id"]').val()).change();
+            $("#countryPhoneCode").change(function () {
+                $('#localTelephoneNumber-error').appendTo($('#localTelephoneNumber-error').parent().first());
+                var end = this.value;
+                $('.localTelephoneNumber').hide();
+                $('.localTelephoneNumber.phone-length-'+end).show();
+            });
+
+            $(".localTelephoneNumber").on('change keydown paste input', function(){
+                self.validatePhone($(this));
+                self.registerPhone();
+            });
+            $('.localTelephoneNumber').each(function() {
+                self.validatePhone($(this));
+            });
+            self.registerPhone();
+
+            if($('select[name="country_id"]').val()){
+                $("#countryPhoneCode").val($('select[name="country_id"]').val()).change();
+            } else {
+                $("#countryPhoneCode").val('').change();
             }
+
+
+
+
           }
         },
         /**
