@@ -209,60 +209,84 @@ define([
 
             $('#shipping-new-address-form input[name="telephone"]').hide();
             $('#shipping-new-address-form input[name="telephone"]').before( html );
-
-
-
+            var dataForm = $('#co-shipping-form .localTelephoneNumber');
+            dataForm.mage('validation', {});
             $('#countryPhoneCode > option').each(function() {
-                console.log('777777777777')
                 var countryCode = $(this).val();
                 var countryPhoneLengthMessage = '';
                 if(countryCode == 'SA'){ // Saudi Arabia
                     countryPhoneLengthMessage = '9';
-                } else if (countryCode == 'KW'){ // Kuwait
-                    countryPhoneLengthMessage = '7 '+$t('or')+' 8';
-                } else if (countryCode == 'RO'){ // Romania
+                } else if (countryCode == 'BH'){ // Bahrain
+                    countryPhoneLengthMessage = '8';
+                } else if (countryCode == 'AE'){ // United Arab Emirates
                     countryPhoneLengthMessage = '9';
-                } else {
-                    countryPhoneLengthMessage ='';
+                } else if (countryCode == 'KW'){ // Kuwait
+                    countryPhoneLengthMessage = '8';
+                } else if (countryCode == 'OM'){ // Oman
+                    countryPhoneLengthMessage = '8';
+                } else if (countryCode == 'IQ'){ // Iraq
+                    countryPhoneLengthMessage = '10';
+                } else if (countryCode == 'QA'){ // Qatar
+                    countryPhoneLengthMessage = '8';
                 }
 
-                $('.phone-length-'+countryCode).on('change keydown paste input', function(){
-                    var currentElement = $(this);
-                    var value = currentElement.val();
+                $.validator.addMethod('phone-length-'+countryCode , function (value) {
                     if(countryCode == 'SA'){ // Saudi Arabia
                         if( value.length == 9 ){
+                            return true;
                         }else{
-                            var errorElement = '<div class="field-error two">';
-                            errorElement+='<span>'+ $t("Phone numbers are exactly %s digits.").replace("%s", countryPhoneLengthMessage) +'</span>';
-                            errorElement+='</div>';
-                            $( ".phoneArea .field-error" ).remove();
-                            $( ".phoneArea" ).append( errorElement );
+                            return false;
+                        }
+                    } else if (countryCode == 'BH'){ // Bahrain
+                        if( value.length == 8 ){
+                            return true;
+                        }else{
+                            return false;
+                        }
+                    } else if (countryCode == 'AE'){ // United Arab Emirates
+                        if( value.length == 9 ){
+                            return true;
+                        }else{
+                            return false;
                         }
                     } else if (countryCode == 'KW'){ // Kuwait
-                        if( value.length == 7 || value.length == 8 ){
+                        if( value.length == 8 ){
+                            return true;
                         }else{
-                            var errorElement = '<div class="field-error two">';
-                            errorElement+='<span>'+ $t("Phone numbers are exactly %s digits.").replace("%s", countryPhoneLengthMessage) +'</span>';
-                            errorElement+='</div>';
-                            $( ".phoneArea .field-error" ).remove();
-                            $( ".phoneArea" ).append( errorElement );
+                            return false;
                         }
-                    } else if (countryCode == 'RO'){ // Romania
-                        if( value.length == 9 ){
+                    } else if (countryCode == 'OM'){ // Oman
+                        if( value.length == 8 ){
+                            return true;
                         }else{
-                            var errorElement = '<div class="field-error two">';
-                            errorElement+='<span>'+ $t("Phone numbers are exactly %s digits.").replace("%s", countryPhoneLengthMessage) +'</span>';
-                            errorElement+='</div>';
-                            $( ".phoneArea .field-error" ).remove();
-                            $( ".phoneArea" ).append( errorElement );
+                            return false;
                         }
-                    } else {
-
+                    } else if (countryCode == 'IQ'){ // Iraq
+                        if( value.length == 10 ){
+                            return true;
+                        }else{
+                            return false;
+                        }
+                    } else if (countryCode == 'QA'){ // Qatar
+                        if( value.length == 8 ){
+                            return true;
+                        }else{
+                            return false;
+                        }
                     }
+                }, $t('Phone number is exactly %s digits.').replace('%s', countryPhoneLengthMessage));
 
-
-                });
             });
+
+            var checkIfActionSaveAddressExist = setInterval(function(){
+                if($('.action.primary.btn.btn-custom.action-save-address').length){
+                    $(".action.primary.btn.btn-custom.action-save-address").click(function(event){
+                        var dataForm = $('#co-shipping-form .localTelephoneNumber:visible');
+                        var valid = dataForm.validation('isValid');
+                    });
+                    clearInterval(checkIfActionSaveAddressExist);
+                }
+            }, 500);
 
             $('select[name="country_id"]').change(function () {
                 var end = this.value;
@@ -289,9 +313,6 @@ define([
             } else {
                 $("#countryPhoneCode").val('').change();
             }
-
-
-
 
           }
         },
