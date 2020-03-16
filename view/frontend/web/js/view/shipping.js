@@ -146,7 +146,11 @@ define([
             var phoneCode = $('#countryPhoneCode').find(":selected").data('phone-code');
             var localPhoneNumber = $('#localTelephoneNumber').val();
             var internationalPhoneNumber = phoneCode + localPhoneNumber;
-            $('input[name="telephone"]').val(internationalPhoneNumber).change();
+            if ($('#localTelephoneNumber').hasClass('error')) {
+                $('#shipping-new-address-form input[name="telephone"]').val("").change();
+            }else{
+                $('#shipping-new-address-form input[name="telephone"]').val(internationalPhoneNumber).change();
+            }
         },
         validatePhone: function(element){
           var localPhoneNumber = element.val();
@@ -202,18 +206,97 @@ define([
                       });
                     html += '</select>';
                   html += '</div>';
-                $.each(allowedCountries, function( index, countryCode ) {
-                    html += '<input type="text" id="localTelephoneNumber" required="true" class="input-text required localTelephoneNumber phone-length-'+ countryCode +'" style="width: calc(100% - 100px);display: inline-block;">';
-                });
+                  html += '<input type="text" id="localTelephoneNumber" required="true" class="input-text required localTelephoneNumber" style="width: calc(100% - 100px);display: inline-block;">';
             html += '</div>';
-
             $('#shipping-new-address-form input[name="telephone"]').hide();
             $('#shipping-new-address-form input[name="telephone"]').before( html );
-            var dataForm = $('#co-shipping-form .localTelephoneNumber');
-            dataForm.mage('validation', {});
-            $('#countryPhoneCode > option').each(function() {
-                var countryCode = $(this).val();
-                var countryPhoneLengthMessage = '';
+
+
+            $('select[name="country_id"]').change(function () {
+                var end = this.value;
+                $("#countryPhoneCode").val(end).change();
+            });
+            $("#countryPhoneCode").change(function () {
+                $('#localTelephoneNumber-error').appendTo($('#localTelephoneNumber-error').parent().first());
+                self.validatePhone($("#localTelephoneNumber"));
+                self.validatePhoneLenght();
+                self.registerPhone();
+            });
+
+            $("#localTelephoneNumber").on('change keydown paste input', function(){
+                self.validatePhone($(this));
+                self.validatePhoneLenght();
+                self.registerPhone();
+            });
+            self.validatePhone($('#localTelephoneNumber'));
+            self.registerPhone();
+
+            if($('select[name="country_id"]').val()){
+                $("#countryPhoneCode").val($('select[name="country_id"]').val()).change();
+            } else {
+                $("#countryPhoneCode").val('').change();
+            }
+
+          }
+        },
+        validatePhoneLenght: function(){
+            console.log('validatePhone *********** ');
+            var countryCode = $("#countryPhoneCode").val();
+              console.log('countryCode *********** ' + countryCode);
+            var value = $("#localTelephoneNumber").val();
+              console.log('value *********** ' + value);
+            var returnVal = false;
+            if(value){
+                if(countryCode == 'SA'){ // Saudi Arabia
+                    if( value.length == 9 ){
+                        returnVal = true;
+                    }else{
+                        returnVal = false;
+                    }
+                } else if (countryCode == 'BH'){ // Bahrain
+                    if( value.length == 8 ){
+                        returnVal = true;
+                    }else{
+                        returnVal = false;
+                    }
+                } else if (countryCode == 'AE'){ // United Arab Emirates
+                    if( value.length == 9 ){
+                        returnVal = true;
+                    }else{
+                        returnVal = false;
+                    }
+                } else if (countryCode == 'KW'){ // Kuwait
+                    if( value.length == 8 ){
+                        returnVal = true;
+                    }else{
+                        returnVal = false;
+                    }
+                } else if (countryCode == 'OM'){ // Oman
+                    if( value.length == 8 ){
+                        returnVal = true;
+                    }else{
+                        returnVal = false;
+                    }
+                } else if (countryCode == 'IQ'){ // Iraq
+                    if( value.length == 10 ){
+                        returnVal = true;
+                    }else{
+                        returnVal = false;
+                    }
+                } else if (countryCode == 'QA'){ // Qatar
+                    if( value.length == 8 ){
+                        returnVal = true;
+                    }else{
+                        returnVal = false;
+                    }
+                }
+            } else {
+                returnVal = false;
+            }
+
+            var countryPhoneLengthMessage = '';
+            if(returnVal == false){
+                var countryCode = $('#countryPhoneCode').val();
                 if(countryCode == 'SA'){ // Saudi Arabia
                     countryPhoneLengthMessage = '9';
                 } else if (countryCode == 'BH'){ // Bahrain
@@ -229,92 +312,15 @@ define([
                 } else if (countryCode == 'QA'){ // Qatar
                     countryPhoneLengthMessage = '8';
                 }
-
-                $.validator.addMethod('phone-length-'+countryCode , function (value) {
-                    if(countryCode == 'SA'){ // Saudi Arabia
-                        if( value.length == 9 ){
-                            return true;
-                        }else{
-                            return false;
-                        }
-                    } else if (countryCode == 'BH'){ // Bahrain
-                        if( value.length == 8 ){
-                            return true;
-                        }else{
-                            return false;
-                        }
-                    } else if (countryCode == 'AE'){ // United Arab Emirates
-                        if( value.length == 9 ){
-                            return true;
-                        }else{
-                            return false;
-                        }
-                    } else if (countryCode == 'KW'){ // Kuwait
-                        if( value.length == 8 ){
-                            return true;
-                        }else{
-                            return false;
-                        }
-                    } else if (countryCode == 'OM'){ // Oman
-                        if( value.length == 8 ){
-                            return true;
-                        }else{
-                            return false;
-                        }
-                    } else if (countryCode == 'IQ'){ // Iraq
-                        if( value.length == 10 ){
-                            return true;
-                        }else{
-                            return false;
-                        }
-                    } else if (countryCode == 'QA'){ // Qatar
-                        if( value.length == 8 ){
-                            return true;
-                        }else{
-                            return false;
-                        }
-                    }
-                }, $t('Phone number is exactly %s digits.').replace('%s', countryPhoneLengthMessage));
-
-            });
-
-            var checkIfActionSaveAddressExist = setInterval(function(){
-                if($('.action.primary.btn.btn-custom.action-save-address').length){
-                    $(".action.primary.btn.btn-custom.action-save-address").click(function(event){
-                        var dataForm = $('#co-shipping-form .localTelephoneNumber:visible');
-                        var valid = dataForm.validation('isValid');
-                    });
-                    clearInterval(checkIfActionSaveAddressExist);
-                }
-            }, 500);
-
-            $('select[name="country_id"]').change(function () {
-                var end = this.value;
-                $("#countryPhoneCode").val(end).change();
-            });
-            $("#countryPhoneCode").change(function () {
-                $('#localTelephoneNumber-error').appendTo($('#localTelephoneNumber-error').parent().first());
-                var end = this.value;
-                $('.localTelephoneNumber').hide();
-                $('.localTelephoneNumber.phone-length-'+end).show();
-            });
-
-            $(".localTelephoneNumber").on('change keydown paste input', function(){
-                self.validatePhone($(this));
-                self.registerPhone();
-            });
-            $('.localTelephoneNumber').each(function() {
-                self.validatePhone($(this));
-            });
-            self.registerPhone();
-
-            if($('select[name="country_id"]').val()){
-                $("#countryPhoneCode").val($('select[name="country_id"]').val()).change();
+                var errorHtml = '<div class="field-error" generated="true"><span>' + $t('Phone number is exactly %s digits.').replace('%s', countryPhoneLengthMessage) + '</span></div>';
+                $('.phoneArea .field-error').remove();
+                $('#localTelephoneNumber').after( errorHtml );
+                $('#localTelephoneNumber').addClass('error');
             } else {
-                $("#countryPhoneCode").val('').change();
+                $('.phoneArea .field-error').remove();
+                $('#localTelephoneNumber').removeClass('error');
             }
 
-          }
         },
         /**
          * @return {*}
