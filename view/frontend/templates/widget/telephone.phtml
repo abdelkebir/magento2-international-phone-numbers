@@ -36,15 +36,22 @@ $allowedCountries = explode(",",$block->getAllowedCountries());
                 </select>
               </div>
               <?php
+              $increment = 1;
               foreach($allowedCountries as $countryCode){
                   $countryInformation = $block->getCountryInformation($countryCode);
                   ?>
                   <input type="text"
                          id="localTelephoneNumber"
+                         <?php if($increment==1){ ?>
+                           style="display:inline-block;"
+                         <?php } else { ?>
+                           style="display:none;"
+                         <?php } ?>
                          value="<?= $block->escapeHtmlAttr($block->getLocalTelephone()) ?>"
                          title="<?= $block->escapeHtmlAttr(__('Phone Number')) ?>"
                          class="localTelephoneNumber input-text phone-length-<?= $countryCode ?> <?= $_validationClass ?: '' ?>">
                   <?php
+                  $increment++;
               }
               ?>
         </div>
@@ -173,7 +180,7 @@ $allowedCountries = explode(",",$block->getAllowedCountries());
                 $("#countryPhoneCode").val(end).change();
             });
             $("#countryPhoneCode").change(function () {
-                $('#localTelephoneNumber-error').appendTo($('#localTelephoneNumber-error').parent().first());
+                $('#localTelephoneNumber-error').remove();
                 var end = this.value;
                 $('.localTelephoneNumber').hide();
                 $('.localTelephoneNumber.phone-length-'+end).show();
