@@ -159,11 +159,11 @@ $allowedCountries = explode(",",$block->getAllowedCountries());
                   }
               });
               var outputlocalPhoneNumber = outputlocalPhoneNumberArray.join("");
-              element.val(outputlocalPhoneNumber);
+              $('.localTelephoneNumber').val(outputlocalPhoneNumber);
             }
             function registerPhone(){
               var phoneCode = $('#countryPhoneCode').find(":selected").data('phone-code');
-              var localPhoneNumber = $('#localTelephoneNumber').val();
+              var localPhoneNumber = $('.localTelephoneNumber:visible').val();
               var internationalPhoneNumber = phoneCode + localPhoneNumber;
               $('#telephone').val(internationalPhoneNumber);
             }
